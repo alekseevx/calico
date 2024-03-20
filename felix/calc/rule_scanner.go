@@ -352,6 +352,8 @@ type ParsedRule struct {
 	HTTPMatch *model.HTTPMatch
 
 	Metadata *model.RuleMetadata
+
+	DSCPClass string
 }
 
 func ruleToParsedRule(rule *model.Rule) (parsedRule *ParsedRule, allIPSets []*IPSetData) {
@@ -480,6 +482,8 @@ func ruleToParsedRule(rule *model.Rule) (parsedRule *ParsedRule, allIPSets []*IP
 
 		// Pass through metadata (used by iptables backend)
 		Metadata: rule.Metadata,
+
+		DSCPClass: rule.DSCPClass,
 	}
 
 	allIPSets = append(allIPSets, srcNamedPortIPSets...)

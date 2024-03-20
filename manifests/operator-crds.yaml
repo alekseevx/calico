@@ -24443,6 +24443,9 @@ spec:
                               type: string
                           type: object
                       type: object
+                    dscpClass:
+                      description: Sets the dscpClass for the SetDscpClass action
+                      type: string
                   required:
                   - action
                   type: object

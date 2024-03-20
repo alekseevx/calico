@@ -148,6 +148,9 @@ type endpointManager struct {
 	activeWlDispatchChains     map[string]*iptables.Chain
 	activeEPMarkDispatchChains map[string]*iptables.Chain
 
+	activeMangleWlDispatchChains map[string]*iptables.Chain
+	activeMangleWlIDToChains     map[proto.WorkloadEndpointID][]*iptables.Chain
+
 	// Workload endpoints that would be locally active but are 'shadowed' by other endpoints
 	// with the same interface name.
 	shadowedWlEndpoints map[proto.WorkloadEndpointID]*proto.WorkloadEndpoint
@@ -319,6 +322,8 @@ func newEndpointManagerWithShims(
 		activeHostMangleDispatchChains: map[string]*iptables.Chain{},
 		activeHostRawDispatchChains:    map[string]*iptables.Chain{},
 		activeEPMarkDispatchChains:     map[string]*iptables.Chain{},
+		activeMangleWlDispatchChains:   map[string]*iptables.Chain{},
+		activeMangleWlIDToChains:       map[proto.WorkloadEndpointID][]*iptables.Chain{},
 		needToCheckDispatchChains:      true, // Need to do start-of-day update.
 		needToCheckEndpointMarkChains:  true, // Need to do start-of-day update.
 
@@ -551,6 +556,8 @@ func (m *endpointManager) resolveWorkloadEndpoints() {
 		m.callbacks.InvokeRemoveWorkload(oldWorkload)
 		m.filterTable.RemoveChains(m.activeWlIDToChains[id])
 		delete(m.activeWlIDToChains, id)
+		m.mangleTable.RemoveChains(m.activeMangleWlIDToChains[id])
+		delete(m.activeMangleWlIDToChains, id)
 		if oldWorkload != nil {
 			m.epMarkMapper.ReleaseEndpointMark(oldWorkload.Name)
 			// Remove any routes from the routing table.  The RouteTable will remove any
@@ -632,6 +639,14 @@ func (m *endpointManager) resolveWorkloadEndpoints() {
 					)
 					m.filterTable.UpdateChains(chains)
 					m.activeWlIDToChains[id] = chains
+
+					mangleChains := m.ruleRenderer.MangleWorkloadEndpointToIptables(
+						workload.Name,
+						m.epMarkMapper,
+						egressPolicyNames,
+					)
+					m.mangleTable.UpdateChains(mangleChains)
+					m.activeMangleWlIDToChains[id] = mangleChains
 
 					if len(workload.AllowSpoofedSourcePrefixes) > 0 && !m.hasSourceSpoofingConfiguration(workload.Name) {
 						logCxt.Infof("Disabling RPF check for workload %s", workload.Name)
@@ -734,6 +749,8 @@ func (m *endpointManager) resolveWorkloadEndpoints() {
 		// Rewrite the dispatch chains if they've changed.
 		newDispatchChains := m.ruleRenderer.WorkloadDispatchChains(m.activeWlEndpoints)
 		m.updateDispatchChains(m.activeWlDispatchChains, newDispatchChains, m.filterTable)
+		newMangleDispatchChains := m.ruleRenderer.MangleWorkloadDispatchChains(m.activeWlEndpoints)
+		m.updateDispatchChains(m.activeMangleWlDispatchChains, newMangleDispatchChains, m.mangleTable)
 		m.needToCheckDispatchChains = false
 
 		// Set flag to update endpoint mark chains.

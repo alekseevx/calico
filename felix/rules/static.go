@@ -991,6 +991,7 @@ func (r *DefaultRuleRenderer) StaticMangleTableChains(ipVersion uint8) []*Chain 
 		r.failsafeOutChain("mangle", ipVersion),
 		r.StaticManglePreroutingChain(ipVersion),
 		r.StaticManglePostroutingChain(ipVersion),
+		r.StaticMangleForwardChain(),
 	)
 
 	return chains
@@ -1116,6 +1117,27 @@ func (r *DefaultRuleRenderer) StaticManglePostroutingChain(ipVersion uint8) *Cha
 
 	return &Chain{
 		Name:  ChainManglePostrouting,
+		Rules: rules,
+	}
+}
+
+func (r *DefaultRuleRenderer) StaticMangleForwardChain() *Chain {
+	rules := []Rule{}
+
+	// Jump to workload dispatch chains.
+	for _, prefix := range r.WorkloadIfacePrefixes {
+		log.WithField("ifacePrefix", prefix).Debug("Adding workload match rules")
+		ifaceMatch := prefix + "+"
+		rules = append(rules,
+			Rule{
+				Match:  Match().InInterface(ifaceMatch),
+				Action: JumpAction{Target: ChainFromWorkloadDispatch},
+			},
+		)
+	}
+
+	return &Chain{
+		Name:  ChainMangleForward,
 		Rules: rules,
 	}
 }

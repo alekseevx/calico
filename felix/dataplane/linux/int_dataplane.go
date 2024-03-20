@@ -1756,6 +1756,9 @@ func (d *InternalDataplane) setUpIptablesNormal() {
 		t.InsertOrAppendRules("POSTROUTING", []iptables.Rule{{
 			Action: iptables.JumpAction{Target: rules.ChainManglePostrouting},
 		}})
+		t.InsertOrAppendRules("FORWARD", []iptables.Rule{{
+			Action: iptables.JumpAction{Target: rules.ChainMangleForward},
+		}})
 	}
 	if d.xdpState != nil {
 		if err := d.setXDPFailsafePorts(); err != nil {

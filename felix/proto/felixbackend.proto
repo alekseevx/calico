@@ -329,6 +329,8 @@ message Rule {
 
   // An opaque ID/hash for the rule.
   string rule_id = 201;
+
+  string dscp_class = 202;
 }
 
 message ServiceAccountMatch {

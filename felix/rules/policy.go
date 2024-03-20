@@ -33,11 +33,22 @@ func (r *DefaultRuleRenderer) PolicyToIptablesChains(policyID *proto.PolicyID, p
 		Name:  PolicyChainName(PolicyInboundPfx, policyID),
 		Rules: r.ProtoRulesToIptablesRules(policy.InboundRules, ipVersion, fmt.Sprintf("Policy %s ingress", policyID.Name)),
 	}
+	// Rules for mange for Inbound are not supported
+	inbound.Rules, _ = ExtractMangleRules(inbound.Rules)
+
+	var mangleOutboundRules []iptables.Rule
 	outbound := iptables.Chain{
 		Name:  PolicyChainName(PolicyOutboundPfx, policyID),
 		Rules: r.ProtoRulesToIptablesRules(policy.OutboundRules, ipVersion, fmt.Sprintf("Policy %s egress", policyID.Name)),
 	}
-	return []*iptables.Chain{&inbound, &outbound}
+	outbound.Rules, mangleOutboundRules = ExtractMangleRules(outbound.Rules)
+
+	mangleOutbound := iptables.Chain{
+		Name:  PolicyChainName(PolicyMangleOutboundPfx, policyID),
+		Rules: mangleOutboundRules,
+	}
+
+	return []*iptables.Chain{&inbound, &outbound, &mangleOutbound}
 }
 
 func (r *DefaultRuleRenderer) ProfileToIptablesChains(profileID *proto.ProfileID, profile *proto.Profile, ipVersion uint8) (inbound, outbound *iptables.Chain) {
@@ -530,6 +541,10 @@ func (r *DefaultRuleRenderer) CalculateActions(pRule *proto.Rule, ipVersion uint
 		actions = append(actions, iptables.LogAction{
 			Prefix: r.IptablesLogPrefix,
 		})
+	case "setdscpclass", "SetDcpClass":
+		actions = append(actions, iptables.SetDscpClassAction{
+			DSCPClass: pRule.DSCPClass,
+		})
 	default:
 		log.WithField("action", pRule.Action).Panic("Unknown rule action")
 	}
@@ -796,4 +811,18 @@ func ProfileChainName(prefix ProfileChainNamePrefix, profID *proto.ProfileID) st
 		profID.Name,
 		iptables.MaxChainNameLength,
 	)
+}
+
+func ExtractMangleRules(in []iptables.Rule) (out []iptables.Rule, mangleRules []iptables.Rule) {
+	out = make([]iptables.Rule, 0, len(in))
+	for i := range in {
+		switch in[i].Action.(type) {
+		case iptables.SetDscpClassAction:
+			mangleRules = append(mangleRules, in[i])
+		default:
+			out = append(out, in[i])
+		}
+	}
+
+	return
 }

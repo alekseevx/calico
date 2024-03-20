@@ -5163,6 +5163,12 @@ func schema_pkg_apis_projectcalico_v3_Rule(ref common.ReferenceCallback) common.
 							Ref:         ref("github.com/projectcalico/api/pkg/apis/projectcalico/v3.RuleMetadata"),
 						},
 					},
+					"dscpClass": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
 				Required: []string{"action"},
 			},

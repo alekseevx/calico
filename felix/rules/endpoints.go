@@ -20,6 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/projectcalico/calico/felix/hashutils"
+	"github.com/projectcalico/calico/felix/iptables"
 	. "github.com/projectcalico/calico/felix/iptables"
 	"github.com/projectcalico/calico/felix/proto"
 )
@@ -87,6 +88,22 @@ func (r *DefaultRuleRenderer) WorkloadEndpointToIptablesChains(
 	}
 
 	return result
+}
+
+func (r *DefaultRuleRenderer) MangleWorkloadEndpointToIptables(ifaceName string, epMarkMapper EndpointMarkMapper, egressPolicies []string) []*iptables.Chain {
+	chain := Chain{
+		Name: EndpointChainName(WorkloadFromEndpointPfx, ifaceName),
+	}
+	for _, polID := range egressPolicies {
+		polChainName := PolicyChainName(
+			PolicyMangleOutboundPfx,
+			&proto.PolicyID{Name: polID},
+		)
+		chain.Rules = append(chain.Rules, Rule{Action: JumpAction{Target: polChainName}})
+	}
+	chain.Rules = append(chain.Rules, Rule{Action: ReturnAction{}})
+
+	return []*Chain{&chain}
 }
 
 func (r *DefaultRuleRenderer) HostEndpointToFilterChains(

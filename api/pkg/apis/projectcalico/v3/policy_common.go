@@ -63,6 +63,8 @@ type Rule struct {
 
 	// Metadata contains additional information for this rule
 	Metadata *RuleMetadata `json:"metadata,omitempty" validate:"omitempty"`
+
+	DSCPClass string `json:"dscpClass,omitempty" validate:"omitempty"`
 }
 
 // HTTPPath specifies an HTTP path to match. It may be either of the form:
@@ -202,10 +204,11 @@ type ServiceAccountMatch struct {
 type Action string
 
 const (
-	Allow Action = "Allow"
-	Deny  Action = "Deny"
-	Log   Action = "Log"
-	Pass  Action = "Pass"
+	Allow        Action = "Allow"
+	Deny         Action = "Deny"
+	Log          Action = "Log"
+	Pass         Action = "Pass"
+	SetDSCPClass Action = "SetDscpClass"
 )
 
 type RuleMetadata struct {

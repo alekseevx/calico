@@ -213,6 +213,7 @@ func RuleAPIV2ToBackend(ar apiv3.Rule, ns string) model.Rule {
 			}
 		}
 	}
+	r.DSCPClass = ar.DSCPClass
 	return r
 }
 

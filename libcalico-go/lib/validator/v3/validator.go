@@ -82,7 +82,7 @@ var (
 	bgpFilterInterfaceRegex = regexp.MustCompile("^[a-zA-Z0-9_.*-]{1,15}$")
 	ignoredInterfaceRegex   = regexp.MustCompile("^[a-zA-Z0-9_.*-]{1,15}$")
 	ifaceFilterRegex        = regexp.MustCompile("^[a-zA-Z0-9:._+-]{1,15}$")
-	actionRegex             = regexp.MustCompile("^(Allow|Deny|Log|Pass)$")
+	actionRegex             = regexp.MustCompile("^(Allow|Deny|Log|Pass|SetDscpClass)$")
 	protocolRegex           = regexp.MustCompile("^(TCP|UDP|ICMP|ICMPv6|SCTP|UDPLite)$")
 	ipipModeRegex           = regexp.MustCompile("^(Always|CrossSubnet|Never)$")
 	vxlanModeRegex          = regexp.MustCompile("^(Always|CrossSubnet|Never)$")

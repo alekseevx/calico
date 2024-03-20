@@ -216,6 +216,8 @@ func rulebackendToAPIv3(br model.Rule) apiv3.Rule {
 			NotSelector: notDstSelector,
 			NotPorts:    br.NotDstPorts,
 		},
+
+		DSCPClass: br.DSCPClass,
 	}
 }
 

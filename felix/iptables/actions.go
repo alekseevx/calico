@@ -295,3 +295,15 @@ func (c SetConnMarkAction) ToFragment(features *environment.Features) string {
 func (c SetConnMarkAction) String() string {
 	return fmt.Sprintf("SetConnMarkWithMask:%#x/%#x", c.Mark, c.Mask)
 }
+
+type SetDscpClassAction struct {
+	DSCPClass string
+}
+
+func (g SetDscpClassAction) String() string {
+	return fmt.Sprintf("SetDSCP:%s", g.DSCPClass)
+}
+
+func (g SetDscpClassAction) ToFragment(features *environment.Features) string {
+	return fmt.Sprintf("--jump DSCP --set-dscp-class %s -v", g.DSCPClass)
+}

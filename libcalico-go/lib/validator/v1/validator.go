@@ -44,8 +44,8 @@ var (
 	nameRegex           = regexp.MustCompile("^[a-zA-Z0-9_.-]{1,128}$")
 	namespacedNameRegex = regexp.MustCompile(`^[a-zA-Z0-9_./-]{1,128}$`)
 	interfaceRegex      = regexp.MustCompile("^[a-zA-Z0-9_.-]{1,15}$")
-	actionRegex         = regexp.MustCompile("^(allow|deny|log|pass)$")
-	backendActionRegex  = regexp.MustCompile("^(allow|deny|log|next-tier|)$")
+	actionRegex         = regexp.MustCompile("^(allow|deny|log|pass|setdscpclass)$")
+	backendActionRegex  = regexp.MustCompile("^(allow|deny|log|next-tier|setdscpclass)$")
 	protocolRegex       = regexp.MustCompile("^(tcp|udp|icmp|icmpv6|sctp|udplite)$")
 	ipipModeRegex       = regexp.MustCompile("^(always|cross-subnet|)$")
 	reasonString        = "Reason: "

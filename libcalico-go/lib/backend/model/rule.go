@@ -87,6 +87,8 @@ type Rule struct {
 	LogPrefix string `json:"log_prefix,omitempty" validate:"omitempty"`
 
 	Metadata *RuleMetadata `json:"metadata,omitempty" validate:"omitempty"`
+
+	DSCPClass string `json:"dscpClass,omitempty" validate:"omitempty"`
 }
 
 type HTTPMatch struct {

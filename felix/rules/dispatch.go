@@ -97,6 +97,25 @@ func (r *DefaultRuleRenderer) WorkloadInterfaceAllowChains(
 	return chains
 }
 
+func (r *DefaultRuleRenderer) MangleWorkloadDispatchChains(endpoints map[proto.WorkloadEndpointID]*proto.WorkloadEndpoint) []*Chain {
+	// Extract endpoint names.
+	log.WithField("numEndpoints", len(endpoints)).Debug("Rendering workload dispatch chains")
+	names := make([]string, 0, len(endpoints))
+	for _, endpoint := range endpoints {
+		names = append(names, endpoint.Name)
+	}
+
+	return r.interfaceNameDispatchChains(
+		names,
+		WorkloadFromEndpointPfx,
+		"",
+		ChainFromWorkloadDispatch,
+		"",
+		nil,
+		nil,
+	)
+}
+
 // In some scenario, e.g. packet goes to an kubernetes ipvs service ip. Traffic goes through input/output filter chain
 // instead of forward filter chain. It is not feasible to match on an incoming workload/host interface with service ips.
 // Assemble a set-endpoint-mark chain to set the endpoint mark matching on the incoming workload/host interface and

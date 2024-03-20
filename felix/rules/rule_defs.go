@@ -57,6 +57,7 @@ const (
 
 	ChainManglePrerouting  = ChainNamePrefix + "PREROUTING"
 	ChainManglePostrouting = ChainNamePrefix + "POSTROUTING"
+	ChainMangleForward     = ChainNamePrefix + "FORWARD"
 
 	IPSetIDNATOutgoingAllPools  = "all-ipam-pools"
 	IPSetIDNATOutgoingMasqPools = "masq-ipam-pools"
@@ -70,10 +71,11 @@ const (
 
 	ChainCIDRBlock = ChainNamePrefix + "cidr-block"
 
-	PolicyInboundPfx   PolicyChainNamePrefix  = ChainNamePrefix + "pi-"
-	PolicyOutboundPfx  PolicyChainNamePrefix  = ChainNamePrefix + "po-"
-	ProfileInboundPfx  ProfileChainNamePrefix = ChainNamePrefix + "pri-"
-	ProfileOutboundPfx ProfileChainNamePrefix = ChainNamePrefix + "pro-"
+	PolicyInboundPfx        PolicyChainNamePrefix  = ChainNamePrefix + "pi-"
+	PolicyOutboundPfx       PolicyChainNamePrefix  = ChainNamePrefix + "po-"
+	PolicyMangleOutboundPfx PolicyChainNamePrefix  = ChainNamePrefix + "mpo-"
+	ProfileInboundPfx       ProfileChainNamePrefix = ChainNamePrefix + "pri-"
+	ProfileOutboundPfx      ProfileChainNamePrefix = ChainNamePrefix + "pro-"
 
 	ChainWorkloadToHost       = ChainNamePrefix + "wl-to-host"
 	ChainFromWorkloadDispatch = ChainNamePrefix + "from-wl-dispatch"
@@ -190,6 +192,9 @@ type RuleRenderer interface {
 	) []*iptables.Chain
 
 	WorkloadInterfaceAllowChains(endpoints map[proto.WorkloadEndpointID]*proto.WorkloadEndpoint) []*iptables.Chain
+
+	MangleWorkloadDispatchChains(map[proto.WorkloadEndpointID]*proto.WorkloadEndpoint) []*iptables.Chain
+	MangleWorkloadEndpointToIptables(ifaceName string, epMarkMapper EndpointMarkMapper, egressPolicies []string) []*iptables.Chain
 
 	EndpointMarkDispatchChains(
 		epMarkMapper EndpointMarkMapper,
